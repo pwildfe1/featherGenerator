@@ -6,6 +6,8 @@ import random as r
 import math as m
 import numpy as np
 import os
+import pandas as pd
+import json
 
 """
 
@@ -125,7 +127,7 @@ class Barb:
 		self.radius = self.stem.radii[self.index]*.75
 
 		# the actual angle is randomized greatly by the entropy
-		self.ang = self.ang + 2*(r.random()-.5)*self.ang*self.entropy
+		self.ang = self.ang + 2*(r.random()-.5)*self.ang*m.pow(self.entropy,2)*.5
 
 		# the actual barb length is a factor of the stem length, radius and entropy
 		self.length = self.stem.length*manual.length*(1.1-m.pow(self.stem_location,3))*(1 + .1*(r.random()-.5)*self.entropy)
@@ -151,10 +153,10 @@ class Barb:
 		
 		torque = r.random()
 
+		self.torsion = self.ang*r.random()
+
 		if torque<.5:
-			self.torsion = 90 + 30*2*(r.random()-.5)
-		else:
-			self.torsion = 0
+			self.torsion = -self.torsion
 
 		if threeD:
 			self.x = np.array(vecRotate(self.x,self.torsion,self.stem.t[self.index]))
@@ -198,7 +200,7 @@ class Barb:
 
 	def wavePoints(self,dir=1):
 
-		waveLength = self.entropy*1.25 #the entropy results in a wavelength that is greater and therefore a more complete arc
+		waveLength = self.entropy*1.5 #the entropy results in a wavelength that is greater and therefore a more complete arc
 		newPts = []
 
 		for i in range(len(self.pts)):
@@ -360,7 +362,7 @@ def Main():
 
 	# Correct first path radius to normalize for any length
 
-	initialRadius = rachis.length/75 # change denominator to increase relative radius
+	initialRadius = rachis.length/90 # decrease the denominator to increase the radius
 	rachis = Stem(path_pts,radius=initialRadius)
 	
 	#
@@ -372,15 +374,13 @@ def Main():
 
 	# each list represents a different trait and each entry in the list represents that trait for that generation
 
-	angles =       [70, 90, 90, 90]
-	long_ratio =   [.2, .4, .5, .3]
-	barb_density = [.04, .03, .05, .04]
-	entropy =      [.5, .3, .3, .3]
-	curl =         [.25, .2, .3, .3]
+	angles =       [60, 90, 70, 60]
+	long_ratio =   [.2, .5, .5, .5]
+	barb_density = [.03, .03, .04, .05]
+	entropy =      [.7, .5, .6, .6]
+	curl =         [.075, .1, .1, .1]
 	thinning =     [1, .75, .5, .5]
 	short_ratio =  [.05, 0, 0, 0]
-
-	#
 
 	####################
 
@@ -424,6 +424,9 @@ def Main():
 			all_barbs.append(curr_barbs[i])
 
 		curr_barbs = []
+
+		# saves a checkpoint at every generation so work can be resumed
+		writePaths(all_paths, 'RHINO/generation_0' + str(n) + '.csv') 
 
 	writePaths(all_paths) # writes all path information, including radius information, to 'RHINO' folder
 

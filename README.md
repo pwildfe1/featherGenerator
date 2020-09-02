@@ -33,3 +33,9 @@ A generative approach to creating down feathers
 * The further a barb is along its stem the thinner its initial radius
 
 * The smaller the inital radius the shorter the barb is likely to be 
+
+
+
+## NOTES:
+
+* To turn the feathers into 3D. Change the default option threeD in the Barb class to True 
