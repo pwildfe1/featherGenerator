@@ -127,7 +127,7 @@ class Barb:
 		self.radius = self.stem.radii[self.index]*.75
 
 		# the actual angle is randomized greatly by the entropy
-		self.ang = self.ang + 2*(r.random()-.5)*self.ang*m.pow(self.entropy,2)*.5
+		self.ang = self.ang + 2*(r.random()-.5)*self.ang*m.pow(self.entropy,2)*.6
 
 		# the actual barb length is a factor of the stem length, radius and entropy
 		self.length = self.stem.length*manual.length*(1.1-m.pow(self.stem_location,3))*(1 + .1*(r.random()-.5)*self.entropy)

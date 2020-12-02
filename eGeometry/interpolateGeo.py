@@ -1341,3 +1341,99 @@ class interpSrf:
 		f.close()
 
 		return [finalCells,upperCells]
+
+
+
+
+class interpPipe:
+
+	def __init__ (self, path ,radius):
+
+		self.pts = path.pts
+		self.t = path.tans
+		self.sections =  []
+		self.radius = radius
+
+	def genSections (self, taper = True, gradient = .5, start = .1):
+
+		self.radii = []
+
+		for i in range(len(self.pts)):
+
+			if taper and i/len(self.pts)>start:
+
+				f = 1 - .5*m.pow(i/len(self.pts)-start,gradient)
+			
+			else:
+			
+				f = 1
+
+			if f>1: f=1
+			
+			self.radii.append(self.radius*f)
+
+			self.sections.append(genCircleSection(self.pts[i],self.t[i],radius))
+
+	def genPipe(self, reso = 8, cap = True):
+
+		if len(self.sections) == 0:
+
+			self.genSections()
+
+		self.srf = interpSrf(self.sections,len(self.pts),reso)
+		self.srf.createFaces()
+
+		if cap:
+			self.srf.v[self.U[-1]]
+
+
+
+
+def exportCrvsOBJ(dir, curves):
+
+	f = open(dir,'w')
+
+	f.write('# Rhino\n\n')
+
+	for i in range(len(curves)):
+		f.write('o object_' + str(i+1) + '\n')
+
+		for j in range(len(curves[i])):
+			f.write('v ')
+
+			for k in range(len(curves[i][j])):
+
+				f.write(str(curves[i][j][k]))
+
+				if k<len(curves[i][j])-1:
+					f.write(' ')
+
+			if j < len(curves[i])-1:
+				f.write('\n')
+
+		f.write('\n')
+		f.write('cstype bspline\ndeg 1\n')
+		f.write('curv')
+
+		length = np.linalg.norm(np.subtract(curves[i][j][0],curves[i][j][-1]))
+
+		f.write(' ' + str(0))
+		f.write(' ' + str(length))
+
+		f.write(' ' + str(2*i+1) + ' ' + str(2*i+2))
+
+		f.write('\n')
+		f.write('param u')
+
+		f.write(' ' + str(0))
+		f.write(' ' + str(0))
+		f.write(' ' + str(length))
+		f.write(' ' + str(length))
+
+		f.write('\n')
+		f.write('end')
+
+		if i<len(curves)-1:
+			f.write('\n')
+
+	f.close()
